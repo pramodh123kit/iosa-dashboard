@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IOSA / CAAL Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1>IOSA / CAAL Readiness Dashboard</h1>
+      <p class="sub">Auto-updates from the latest Excel uploaded to Google Drive</p>
+    </div>
+    <div class="controls">
+      <button id="refreshBtn">Refresh</button>
+      <input id="search" placeholder="Search tasks…" />
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Status</h2>
+      <div id="status" class="status">Loading…</div>
+      <div id="meta" class="meta"></div>
+    </section>
+
+    <section class="card">
+      <h2>Missed deadlines</h2>
+      <div id="missed" class="missed"></div>
+    </section>
+
+    <section class="card">
+      <h2>Timeline</h2>
+      <div class="tableWrap">
+        <table id="grid"></table>
+      </div>
+      <p class="hint">
+        Rule: if a cell is <b>red</b> AND its week date is before today → show as <b>purple</b> and list as missed.
+      </p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
