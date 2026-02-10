@@ -1,96 +1,46 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IOSA / CAAL Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-</head>
-<body>
-  <header class="topbar">
-    <div>
-      <h1>IOSA / CAAL Readiness Dashboard</h1>
-      <p class="sub">Auto-updates from the latest Excel uploaded to Google Drive</p>
-    </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IOSA / CAAL Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <h1>IOSA / CAAL Readiness Dashboard</h1>
+        <p class="sub">Auto-updates from the latest Excel uploaded to Google Drive</p>
+      </div>
+      <div class="controls">
+        <button id="refreshBtn">Refresh</button>
+        <input id="search" placeholder="Search tasks…" />
+      </div>
+    </header>
 
-    <div class="controls">
-      <button id="refreshBtn">Refresh</button>
-      <input id="search" placeholder="Search tasks…" />
-    </div>
-  </header>
-
-  <main class="wrap">
-    <!-- KPI cards -->
-    <section class="kpis">
-      <div class="kpi">
-        <div class="kpiTitle">Total tasks</div>
-        <div id="kpiTasks" class="kpiValue">–</div>
-      </div>
-      <div class="kpi">
-        <div class="kpiTitle">Milestones marked</div>
-        <div id="kpiMarked" class="kpiValue">–</div>
-      </div>
-      <div class="kpi">
-        <div class="kpiTitle">Completed (Green)</div>
-        <div id="kpiGreen" class="kpiValue">–</div>
-      </div>
-      <div class="kpi">
-        <div class="kpiTitle">At risk (Red)</div>
-        <div id="kpiRed" class="kpiValue">–</div>
-      </div>
-      <div class="kpi kpiDanger">
-        <div class="kpiTitle">Missed (Purple)</div>
-        <div id="kpiPurple" class="kpiValue">–</div>
-      </div>
-    </section>
-
-    <!-- Status -->
-    <section class="card">
-      <h2>Status</h2>
-      <div id="status" class="muted">Loading…</div>
-      <div id="meta" class="mutedSmall"></div>
-    </section>
-
-    <!-- Charts row -->
-    <section class="grid2">
+    <main class="container">
       <section class="card">
-        <h2>Monthly overview</h2>
-        <canvas id="chartMonthly" height="120"></canvas>
+        <h2>Status</h2>
+        <div id="status" class="status">Loading…</div>
+        <div id="meta" class="meta"></div>
       </section>
 
-      <section class="card">
-        <h2>Status distribution</h2>
-        <canvas id="chartDonut" height="120"></canvas>
-      </section>
-    </section>
-
-    <!-- Lists row -->
-    <section class="grid2">
       <section class="card">
         <h2>Missed deadlines</h2>
-        <div id="missed" class="list"></div>
+        <div id="missed" class="missed"></div>
       </section>
 
       <section class="card">
-        <h2>Upcoming (next 30 days)</h2>
-        <div id="upcoming" class="list"></div>
+        <h2>Timeline</h2>
+        <div class="tableWrap">
+          <table id="grid"></table>
+        </div>
+        <p class="hint">
+          Rule: if a cell is <b>red</b> AND its week date is before today → show as <b>purple</b> and list as missed.
+        </p>
       </section>
-    </section>
+    </main>
 
-    <!-- Optional: compact timeline (not the full sheet) -->
-    <section class="card">
-      <h2>Tasks (compact timeline)</h2>
-      <div id="compactTableWrap" class="tableWrap">
-        <table id="compactGrid"></table>
-      </div>
-      <p class="hint">
-        Rule: Red + past date → Purple (missed). Green = completed.
-      </p>
-    </section>
-  </main>
-
-  <script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
