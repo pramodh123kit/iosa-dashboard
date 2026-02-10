@@ -1,51 +1,37 @@
-// ===================== CONFIG =====================
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwmdmRW7UvT4pGRGZ87dG3GFzYqUTjIRLu9d7kJACOgjPcSSUFPKy4M8IgGzyGqsK0tMQ/exec";
+// 1) Put your Apps Script Web App URL here:
+const API_URL = "https://script.google.com/macros/s/AKfycbwmdmRW7UvT4pGRGZ87dG3GFzYqUTjIRLu9d7kJACOgjPcSSUFPKy4M8IgGzyGqsK0tMQ/exec";
 
+// 2) Define what “red” and “green” mean in HEX.
+// Google Sheets backgrounds usually look like "#ff0000", "#00ff00", etc.
+// Adjust once you confirm the actual colors used in your sheet.
 const COLOR_RULES = {
-  green: ["#00ff00", "#00b050", "#92d050"],
-  red: ["#ff0000", "#c00000", "#ff5050"],
+  green: ["#00ff00", "#00b050", "#92d050"], // common greens
+  red: ["#ff0000", "#c00000", "#ff5050"],   // common reds
 };
 
+// If a cell is “red” and date < today => show purple
 const PURPLE = "#7c3aed";
 
-// ===================== DOM HELPERS =====================
-function $(id) {
-  return document.getElementById(id);
-}
+const statusEl = document.getElementById("status");
+const metaEl = document.getElementById("meta");
+const gridEl = document.getElementById("grid");
+const missedEl = document.getElementById("missed");
+const refreshBtn = document.getElementById("refreshBtn");
+const searchEl = document.getElementById("search");
 
-const statusEl = $("status");
-const metaEl = $("meta");
-const refreshBtn = $("refreshBtn");
-const searchEl = $("search");
-
-const missedEl = $("missed");
-const upcomingEl = $("upcoming");
-
-const kpiTasks = $("kpiTasks");
-const kpiMarked = $("kpiMarked");
-const kpiGreen = $("kpiGreen");
-const kpiRed = $("kpiRed");
-const kpiPurple = $("kpiPurple");
-
-const compactGridEl = $("compactGrid");
-
-// Charts (optional)
-const chartMonthlyCanvas = $("chartMonthly");
-const chartDonutCanvas = $("chartDonut");
+refreshBtn.addEventListener("click", () => load());
+searchEl.addEventListener("input", () => renderLast());
 
 let lastData = null;
-let chartMonthly = null;
-let chartDonut = null;
 
-// ===================== UTIL =====================
 function normHex(h) {
-  return String(h || "").trim().toLowerCase();
+  if (!h) return "";
+  return String(h).trim().toLowerCase();
 }
 
 function isColorIn(hex, list) {
   const h = normHex(hex);
-  return list.some((x) => normHex(x) === h);
+  return list.some(x => normHex(x) === h);
 }
 
 function classify(hex) {
@@ -61,275 +47,127 @@ function todayISO() {
 }
 
 function compareISO(a, b) {
-  if (!a || !b) return 0;
-  return a < b ? -1 : a > b ? 1 : 0;
+  // lexicographic works for YYYY-MM-DD
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
 }
 
-function isMarkedCell(cell) {
-  if (!cell) return false;
-  const bg = normHex(cell.bg);
-  const txt = String(cell.text || "").trim();
-  const isWhite = !bg || bg === "#ffffff" || bg === "white" || bg === "#fff";
-  return !!txt || !isWhite;
+async function load() {
+  statusEl.textContent = "Loading latest upload…";
+  metaEl.textContent = "";
+  missedEl.innerHTML = "";
+  gridEl.innerHTML = "";
+
+  const res = await fetch(API_URL, { cache: "no-store" });
+  const data = await res.json();
+
+  if (!data.ok) {
+    statusEl.textContent = "Error: " + (data.error || "Unknown");
+    return;
+  }
+
+  lastData = data;
+
+  statusEl.textContent = `Loaded: ${data.sourceFile.name} (updated ${data.sourceFile.updatedIso})`;
+  metaEl.textContent = `Sheet: ${data.meta.sheetName} • Extracted: ${data.meta.extractedAtIso}`;
+
+  renderLast();
 }
 
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
+function renderLast() {
+  if (!lastData) return;
 
-function safeSetText(el, text) {
-  if (el) el.textContent = text;
-}
+  const q = (searchEl.value || "").trim().toLowerCase();
+  const { weekCols, tasks } = lastData;
+  const tISO = todayISO();
 
-function safeSetHTML(el, html) {
-  if (el) el.innerHTML = html;
-}
+  // Filter tasks by search
+  const filtered = tasks.filter(t => !q || t.label.toLowerCase().includes(q));
 
-// ===================== UI BUILDERS =====================
-function itemHtml(x, badgeClass, badgeText) {
-  return `
-    <div class="item">
-      <div class="itemTop">
-        <div><b>${escapeHtml(x.task)}</b></div>
-        <span class="badge ${badgeClass}">${badgeText}</span>
-      </div>
-      <div class="mutedSmall" style="margin-top:6px;">${escapeHtml(x.when)}</div>
-    </div>
-  `;
-}
+  // Build missed deadlines list
+  const missed = [];
 
-function renderCharts(monthBuckets, totals) {
-  // Chart.js or canvases may not exist (don’t crash)
-  if (typeof Chart === "undefined") return;
-  if (!chartMonthlyCanvas || !chartDonutCanvas) return;
+  for (const task of filtered) {
+    for (const cell of task.cells) {
+      const cls = classify(cell.bg);
+      if (cls !== "red") continue;
 
-  const monthOrder = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
+      // If the cell’s week date is before today => missed
+      if (compareISO(cell.date, tISO) === -1) {
+        missed.push({
+          task: task.label,
+          when: `${cell.monthName} W${cell.weekOfMonth} (${cell.date})`,
+          original: cell.bg,
+        });
+      }
+    }
+  }
 
-  const labels = monthOrder.filter((m) => monthBuckets[m]);
-  const greens = labels.map((m) => monthBuckets[m].green || 0);
-  const reds = labels.map((m) => monthBuckets[m].red || 0);
-  const purps = labels.map((m) => monthBuckets[m].purple || 0);
+  missedEl.innerHTML = missed.length
+    ? missed.map(m => `
+        <div class="missedItem">
+          <div><b>${escapeHtml(m.task)}</b></div>
+          <div style="color:#a9b4d0;margin-top:4px;">
+            Missed: ${escapeHtml(m.when)}
+          </div>
+          <div style="color:#a9b4d0;margin-top:2px;font-size:12px;">
+            (red → purple on timeline)
+          </div>
+        </div>
+      `).join("")
+    : `<div style="color:#a9b4d0;">No missed deadlines found in the current view.</div>`;
 
-  if (chartMonthly) chartMonthly.destroy();
-  chartMonthly = new Chart(chartMonthlyCanvas, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        { label: "Green", data: greens },
-        { label: "Red", data: reds },
-        { label: "Purple (Missed)", data: purps },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "bottom" } },
-      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-    },
-  });
-
-  if (chartDonut) chartDonut.destroy();
-  chartDonut = new Chart(chartDonutCanvas, {
-    type: "doughnut",
-    data: {
-      labels: ["Green", "Red", "Purple (Missed)"],
-      datasets: [{ data: [totals.green, totals.red, totals.purple] }],
-    },
-    options: { responsive: true, plugins: { legend: { position: "bottom" } } },
-  });
-}
-
-function renderCompactTable(tasks, weekCols, tISO) {
-  if (!compactGridEl) return;
-
-  const monthHeaders = (weekCols || []).map(
-    (w) => `${String(w.monthName || "").trim()} W${w.weekOfMonth}`
+  // Build table
+  const monthHeaders = weekCols.map(
+    w => `${w.monthName.trim()} W${w.weekOfMonth}`
   );
 
-  compactGridEl.innerHTML = `
+  gridEl.innerHTML = `
     <thead>
       <tr>
         <th class="label">Task</th>
-        ${monthHeaders.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}
+        ${monthHeaders.map(h => `<th>${escapeHtml(h)}</th>`).join("")}
       </tr>
     </thead>
     <tbody>
-      ${(tasks || []).map((task) => {
-        const row = (task.cells || []).map((cell) => {
-          if (!isMarkedCell(cell)) return `<td></td>`;
+      ${filtered.map(task => {
+        const row = task.cells.map(cell => {
           const cls = classify(cell.bg);
-          const date = cell.date || "";
-          const overdue = (cls === "red" && compareISO(date, tISO) === -1);
+          const overdue = cls === "red" && compareISO(cell.date, tISO) === -1;
           const bg = overdue ? PURPLE : (cell.bg || "#ffffff");
-          return `<td><span class="cellBox" title="${escapeHtml(date)}" style="background:${bg}"></span></td>`;
+
+          return `
+            <td>
+              <span
+                class="cellBox"
+                title="${escapeHtml(cell.date)} • ${escapeHtml(cell.bg)}"
+                style="background:${bg}">
+              </span>
+            </td>
+          `;
         }).join("");
 
-        return `<tr>
-          <td class="label">${escapeHtml(task.label)}</td>
-          ${row}
-        </tr>`;
+        return `
+          <tr>
+            <td class="label">${escapeHtml(task.label)}</td>
+            ${row}
+          </tr>
+        `;
       }).join("")}
     </tbody>
   `;
 }
 
-// ===================== MAIN =====================
-async function load() {
-  // Basic DOM presence check (helps you instantly know what’s missing in HTML)
-  const missing = [];
-  if (!statusEl) missing.push("#status");
-  if (!metaEl) missing.push("#meta");
-  if (!refreshBtn) missing.push("#refreshBtn");
-  if (!searchEl) missing.push("#search");
-  if (!missedEl) missing.push("#missed");
-  if (!upcomingEl) missing.push("#upcoming");
-  if (!kpiTasks) missing.push("#kpiTasks");
-  if (!kpiMarked) missing.push("#kpiMarked");
-  if (!kpiGreen) missing.push("#kpiGreen");
-  if (!kpiRed) missing.push("#kpiRed");
-  if (!kpiPurple) missing.push("#kpiPurple");
-  if (!compactGridEl) missing.push("#compactGrid");
-
-  if (missing.length) {
-    // Don’t crash—show helpful message
-    safeSetText(statusEl, "HTML is missing required elements.");
-    safeSetText(metaEl, "Missing: " + missing.join(", "));
-    return;
-  }
-
-  safeSetText(statusEl, "Loading latest upload…");
-  safeSetText(metaEl, "");
-  safeSetHTML(missedEl, "");
-  safeSetHTML(upcomingEl, "");
-  safeSetHTML(compactGridEl, "");
-
-  let data;
-  try {
-    const res = await fetch(API_URL, { cache: "no-store" });
-    data = await res.json();
-  } catch (e) {
-    safeSetText(statusEl, "Network/JSON error: " + String(e));
-    return;
-  }
-
-  if (!data || !data.ok) {
-    safeSetText(statusEl, "Error: " + (data?.error || "Unknown"));
-    return;
-  }
-
-  lastData = data;
-  safeSetText(
-    statusEl,
-    `Loaded: ${data.sourceFile?.name || "latest file"} (updated ${data.sourceFile?.updatedIso || "?"})`
-  );
-  safeSetText(
-    metaEl,
-    `Extracted: ${data.meta?.extractedAtIso || "?"} • Sheet: ${data.meta?.sheetName || "?"}`
-  );
-
-  render();
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
 }
 
-function render() {
-  if (!lastData) return;
-
-  const q = (searchEl.value || "").trim().toLowerCase();
-  const tISO = todayISO();
-
-  const allTasks = Array.isArray(lastData.tasks) ? lastData.tasks : [];
-  const tasks = allTasks.filter((t) => !q || String(t.label || "").toLowerCase().includes(q));
-  const weekCols = Array.isArray(lastData.weekCols) ? lastData.weekCols : [];
-
-  let totalMarked = 0, green = 0, red = 0, purple = 0;
-
-  const monthBuckets = {}; // { March: {green,red,purple}, ... }
-  function ensureMonth(m) {
-    if (!monthBuckets[m]) monthBuckets[m] = { green: 0, red: 0, purple: 0 };
-  }
-
-  const missed = [];
-  const upcoming = [];
-
-  // next 30 days
-  const today = new Date(tISO + "T00:00:00Z");
-  const in30 = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const in30ISO = in30.toISOString().slice(0, 10);
-
-  for (const task of tasks) {
-    const cells = Array.isArray(task.cells) ? task.cells : [];
-    for (const cell of cells) {
-      if (!isMarkedCell(cell)) continue;
-
-      totalMarked += 1;
-
-      const cls = classify(cell.bg);
-      const date = cell.date || "";
-      const month = String(cell.monthName || "").trim() || "Unknown";
-      ensureMonth(month);
-
-      const overdue = (cls === "red" && date && compareISO(date, tISO) === -1);
-
-      if (cls === "green") {
-        green += 1;
-        monthBuckets[month].green += 1;
-      } else if (overdue) {
-        purple += 1;
-        monthBuckets[month].purple += 1;
-        missed.push({
-          task: task.label || "",
-          when: `${month} W${cell.weekOfMonth} (${date || "?"})`,
-          date: date || "9999-12-31",
-        });
-      } else if (cls === "red") {
-        red += 1;
-        monthBuckets[month].red += 1;
-
-        // upcoming in next 30 days
-        if (date && compareISO(date, tISO) >= 0 && compareISO(date, in30ISO) <= 0) {
-          upcoming.push({
-            task: task.label || "",
-            when: `${month} W${cell.weekOfMonth} (${date})`,
-            date,
-          });
-        }
-      }
-    }
-  }
-
-  // KPIs
-  kpiTasks.textContent = String(tasks.length);
-  kpiMarked.textContent = String(totalMarked);
-  kpiGreen.textContent = String(green);
-  kpiRed.textContent = String(red);
-  kpiPurple.textContent = String(purple);
-
-  missed.sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  upcoming.sort((a, b) => String(a.date).localeCompare(String(b.date)));
-
-  missedEl.innerHTML = missed.length
-    ? missed.map((x) => itemHtml(x, "purple", "Missed")).join("")
-    : `<div class="muted">No missed deadlines in this view.</div>`;
-
-  upcomingEl.innerHTML = upcoming.length
-    ? upcoming.map((x) => itemHtml(x, "red", "Upcoming")).join("")
-    : `<div class="muted">No upcoming red items in next 30 days.</div>`;
-
-  renderCharts(monthBuckets, { green, red, purple });
-  renderCompactTable(tasks, weekCols, tISO);
-}
-
-// ===================== EVENTS =====================
-if (refreshBtn) refreshBtn.addEventListener("click", () => load());
-if (searchEl) searchEl.addEventListener("input", () => render());
-
-// Auto-load
+// Auto-load on open
 load();
