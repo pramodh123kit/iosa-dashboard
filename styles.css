@@ -300,7 +300,7 @@ h2{ margin:0 0 6px; font-size:15px; }
 }
 .miniRow:last-child{ border-bottom:none; }
 .miniLeft{ display:flex; flex-direction:column; gap:2px; }
-.miniTitle{ font-weight:950; font-size:13px; }
+.miniTitle{ font-weight:950; font-size:1.2rem; }
 .miniSub{ color:var(--muted); font-size:12px; }
 .miniRight{ text-align:right; font-weight:950; }
 .pct{ color:var(--indigo); }
@@ -353,6 +353,7 @@ h2{ margin:0 0 6px; font-size:15px; }
 
 body{
   font-size: 15px; /* base increased */
+  font-size: 1.6rem;
 }
 
 .title{ font-size: 16px; }
