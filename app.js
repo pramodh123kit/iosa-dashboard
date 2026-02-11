@@ -133,20 +133,36 @@ function renderUpcoming(items){
 }
 
 function renderAudit(audit, name){
+  const setBadge = (badgeEl, percent) => {
+    badgeEl.classList.remove("risk-low","risk-med","risk-high");
+    if (percent >= 85) badgeEl.classList.add("risk-low");
+    else if (percent >= 65) badgeEl.classList.add("risk-med");
+    else badgeEl.classList.add("risk-high");
+    badgeEl.textContent = badgeText(percent);
+  };
+
   if (name === "CAAL"){
     setText("caaWindow", audit ? `${audit.start} → ${audit.end}` : "—");
     setText("caaCountdown", audit ? countdown(audit.daysToStart) : "—");
     setText("caaReady", audit ? `${audit.readinessPercent}%` : "—");
     el("caaBar").style.width = audit ? `${audit.readinessPercent}%` : "0%";
-    el("caaBadge").textContent = audit ? badgeText(audit.readinessPercent) : "—";
+
+    const b = el("caaBadge");
+    if (audit) setBadge(b, audit.readinessPercent);
+    else { b.textContent = "—"; b.classList.remove("risk-low","risk-med","risk-high"); }
+
   } else {
     setText("iosaWindow", audit ? `${audit.start} → ${audit.end}` : "—");
     setText("iosaCountdown", audit ? countdown(audit.daysToStart) : "—");
     setText("iosaReady", audit ? `${audit.readinessPercent}%` : "—");
     el("iosaBar").style.width = audit ? `${audit.readinessPercent}%` : "0%";
-    el("iosaBadge").textContent = audit ? badgeText(audit.readinessPercent) : "—";
+
+    const b = el("iosaBadge");
+    if (audit) setBadge(b, audit.readinessPercent);
+    else { b.textContent = "—"; b.classList.remove("risk-low","risk-med","risk-high"); }
   }
 }
+
 
 function renderPanel(containerId, panel){
   const c = el(containerId);
