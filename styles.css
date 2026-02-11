@@ -475,4 +475,6 @@ h2{ font-size: 16px; }
   }
 }
 
-
+.hidenone {
+  display:none;
+}
