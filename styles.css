@@ -350,3 +350,128 @@ h2{ margin:0 0 6px; font-size:15px; }
 .dot.done{ background:var(--good); }
 .dot.pend{ background:var(--warn); }
 .dot.miss{ background:var(--bad); }
+
+body{
+  font-size: 15px; /* base increased */
+}
+
+.title{ font-size: 16px; }
+.subtitle{ font-size: 13px; }
+
+h2{ font-size: 16px; }
+
+.kpiLabel{ font-size: 13px; }
+.kpiValue{ font-size: 34px; }
+.kpiHint{ font-size: 13px; }
+
+.table{ font-size: 13px; }
+.table th{ font-size: 12.5px; }
+
+.itemTitle{ font-size: 14px; }
+.itemMeta{ font-size: 13px; }
+
+.label{ font-size: 13px; }
+.value{ font-size: 15px; }
+
+.weekTop{ font-size: 13px; }
+
+.topbar{
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand{
+  min-width: 260px;
+  flex: 1 1 auto;
+}
+
+.actions{
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.iconBtn{
+  display:none; /* only on small screens */
+  border: 1px solid rgba(229,231,235,0.9);
+  background: #fff;
+  color: var(--text);
+  border-radius: 14px;
+  padding: 9px 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(17,24,39,0.06);
+}
+.iconBtn:hover{ filter: brightness(0.98); }
+
+@media (max-width: 640px){
+  /* hide the long loaded pill */
+  #lastUpdated{ display:none; }
+
+  /* show search icon */
+  .iconBtn{ display:inline-flex; align-items:center; justify-content:center; }
+
+  /* hide search input by default */
+  .search{
+    display:none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* when user taps the icon, show search input full width */
+  body.search-open .search{
+    display:block;
+  }
+
+  /* make header spacing nicer */
+  .topbar{
+    padding: 12px 14px;
+  }
+
+  .btn{
+    padding: 9px 11px;
+  }
+}
+
+
+.footer{
+  margin-top: 18px;
+  background: #0b3b66;   /* deep aviation blue */
+  color: #ffffff;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.footerInner{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;  /* matches screenshot alignment */
+  gap:10px;
+  font-size: 13px;
+  opacity: 0.95;
+}
+
+.footerDot{
+  display:inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items:center;
+  justify-content:center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  font-weight: 800;
+}
+
+@media (max-width: 640px){
+  .footerInner{
+    justify-content:center;
+    text-align:center;
+    font-size: 12.5px;
+  }
+}
+
+
