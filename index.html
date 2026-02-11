@@ -1,46 +1,196 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IOSA / CAAL Dashboard</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="header">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IOSA / CAAL Executive Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">✈</div>
       <div>
-        <h1>IOSA / CAAL Readiness Dashboard</h1>
-        <p class="sub">Auto-updates from the latest Excel uploaded to Google Drive</p>
+        <div class="title">IOSA / CAAL Readiness Dashboard</div>
+        <div class="subtitle">Executive view • Auto-updates from latest uploaded Excel</div>
       </div>
-      <div class="controls">
-        <button id="refreshBtn">Refresh</button>
-        <input id="search" placeholder="Search tasks…" />
+    </div>
+
+    <div class="actions">
+      <div class="pill" id="lastUpdated">Loading…</div>
+      <button class="btn" id="refreshBtn">Refresh</button>
+      <input class="search" id="search" placeholder="Search missed / tasks…" />
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- KPI CARDS -->
+    <section class="grid kpis">
+      <div class="card kpi">
+        <div class="kpiLabel">Compliance Score</div>
+        <div class="kpiValue" id="kpiScore">—</div>
+        <div class="kpiHint">Weighted index (missed & due-soon impact)</div>
       </div>
-    </header>
 
-    <main class="container">
-      <section class="card">
-        <h2>Status</h2>
-        <div id="status" class="status">Loading…</div>
-        <div id="meta" class="meta"></div>
-      </section>
+      <div class="card kpi">
+        <div class="kpiLabel">Total Planned Items</div>
+        <div class="kpiValue" id="kpiTotal">—</div>
+        <div class="kpiHint">All non-empty colored blocks</div>
+      </div>
 
-      <section class="card">
-        <h2>Missed deadlines</h2>
-        <div id="missed" class="missed"></div>
-      </section>
+      <div class="card kpi">
+        <div class="kpiLabel">Completed</div>
+        <div class="kpiValue good" id="kpiCompleted">—</div>
+        <div class="kpiHint">Green blocks</div>
+      </div>
 
-      <section class="card">
-        <h2>Timeline</h2>
-        <div class="tableWrap">
-          <table id="grid"></table>
+      <div class="card kpi">
+        <div class="kpiLabel">Due Soon (14 days)</div>
+        <div class="kpiValue warn" id="kpiDueSoon">—</div>
+        <div class="kpiHint">Planned but not completed</div>
+      </div>
+
+      <div class="card kpi">
+        <div class="kpiLabel">Missed Deadlines</div>
+        <div class="kpiValue bad" id="kpiMissed">—</div>
+        <div class="kpiHint">Red blocks in the past</div>
+      </div>
+    </section>
+
+    <!-- MISSED DEADLINES + UPCOMING -->
+    <section class="grid two">
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Missed Deadlines</h2>
+            <p class="muted">Red blocks that are now overdue (shown as risk).</p>
+          </div>
         </div>
-        <p class="hint">
-          Rule: if a cell is <b>red</b> AND its week date is before today → show as <b>purple</b> and list as missed.
-        </p>
-      </section>
-    </main>
+        <div class="tableWrap">
+          <table class="table" id="missedTable">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Deadline</th>
+                <th>Date</th>
+                <th class="right">Days Overdue</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty" id="missedEmpty">No missed items detected.</div>
+      </div>
 
-    <script src="app.js"></script>
-  </body>
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Upcoming Critical (30 days)</h2>
+            <p class="muted">Next scheduled items not yet completed.</p>
+          </div>
+        </div>
+        <div class="list" id="upcomingList"></div>
+        <div class="empty" id="upcomingEmpty">No upcoming items in the next 30 days.</div>
+      </div>
+    </section>
+
+    <!-- AUDITS -->
+    <section class="grid two">
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>CAAL Audit Readiness</h2>
+            <p class="muted">Window + readiness based on preparation tasks.</p>
+          </div>
+          <div class="badge" id="caaBadge">—</div>
+        </div>
+
+        <div class="auditRow">
+          <div>
+            <div class="label">Audit Window</div>
+            <div class="value" id="caaWindow">—</div>
+          </div>
+          <div>
+            <div class="label">Countdown</div>
+            <div class="value" id="caaCountdown">—</div>
+          </div>
+          <div>
+            <div class="label">Readiness</div>
+            <div class="value" id="caaReady">—</div>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progressBar" id="caaBar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>IOSA Audit Readiness</h2>
+            <p class="muted">Window + readiness based on preparation tasks.</p>
+          </div>
+          <div class="badge" id="iosaBadge">—</div>
+        </div>
+
+        <div class="auditRow">
+          <div>
+            <div class="label">Audit Window</div>
+            <div class="value" id="iosaWindow">—</div>
+          </div>
+          <div>
+            <div class="label">Countdown</div>
+            <div class="value" id="iosaCountdown">—</div>
+          </div>
+          <div>
+            <div class="label">Readiness</div>
+            <div class="value" id="iosaReady">—</div>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progressBar" id="iosaBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINING / STAFFING / INSPECTIONS -->
+    <section class="grid three">
+      <div class="card">
+        <h2>Training & SOP</h2>
+        <div class="mini" id="trainingPanel"></div>
+      </div>
+
+      <div class="card">
+        <h2>Staffing & Leadership</h2>
+        <div class="mini" id="staffingPanel"></div>
+      </div>
+
+      <div class="card">
+        <h2>Inspections</h2>
+        <div class="mini" id="inspectionsPanel"></div>
+      </div>
+    </section>
+
+    <!-- WEEKLY HEATMAP -->
+    <section class="card">
+      <div class="cardHead">
+        <div>
+          <h2>Weekly Activity Heatmap</h2>
+          <p class="muted">Planned vs completed vs missed (last 28 weeks).</p>
+        </div>
+      </div>
+      <div class="heatmap" id="heatmap"></div>
+      <div class="heatLegend">
+        <span><i class="dot done"></i>Completed</span>
+        <span><i class="dot pend"></i>Pending</span>
+        <span><i class="dot miss"></i>Missed</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
 </html>
