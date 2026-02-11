@@ -6,6 +6,27 @@ const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
 
+searchToggle.addEventListener("click", () => {
+  document.body.classList.toggle("search-open");
+  // focus input when opened
+  if (document.body.classList.contains("search-open")) {
+    searchEl.focus();
+  }
+});
+
+// close search on Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") document.body.classList.remove("search-open");
+});
+
+// close search when input loses focus (mobile-friendly)
+searchEl.addEventListener("blur", () => {
+  // only close on small screens
+  if (window.matchMedia("(max-width: 640px)").matches) {
+    document.body.classList.remove("search-open");
+  }
+});
+
 refreshBtn.addEventListener("click", () => load());
 searchEl.addEventListener("input", () => render());
 
