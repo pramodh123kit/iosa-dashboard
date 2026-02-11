@@ -179,9 +179,9 @@ function renderAudit(audit, name){
     setText("iosaReady", audit ? `${audit.readinessPercent}%` : "—");
     el("iosaBar").style.width = audit ? `${audit.readinessPercent}%` : "0%";
 
-    const b = el("iosaBadge");
-    if (audit) setBadge(b, audit.readinessPercent);
-    else { b.textContent = "—"; b.classList.remove("risk-low","risk-med","risk-high"); }
+    // const b = el("iosaBadge");
+    // if (audit) setBadge(b, audit.readinessPercent);
+    // else { b.textContent = "—"; b.classList.remove("risk-low","risk-med","risk-high"); }
   }
 }
 
