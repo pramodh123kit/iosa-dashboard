@@ -5,6 +5,7 @@ const el = (id) => document.getElementById(id);
 const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
+const searchToggle = el("searchToggle");
 
 searchToggle.addEventListener("click", () => {
   document.body.classList.toggle("search-open");
