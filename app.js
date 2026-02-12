@@ -65,7 +65,7 @@ function render() {
     setText("kpiCompleted", "—");
     setText("kpiDueSoon", "—");
     setText("kpiMissed", "—");
-    renderMissed([]);
+    renderDeadlinesTable("completed", []);
     renderUpcoming([]);
     renderAudit(null, "CAAL");
     renderAudit(null, "IOSA");
@@ -124,6 +124,9 @@ function renderMissed(rows) {
   const table = el("missedTable");
   const body = table.querySelector("tbody");
   const empty = el("missedEmpty");
+  if (!table || !thead || !empty) return; // ✅ safety
+   const body = table.querySelector("tbody");
+  if (!body) return; // ✅ safety
 
   body.innerHTML = "";
 
