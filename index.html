@@ -74,25 +74,26 @@
       <div class="card">
         <div class="cardHead">
           <div>
-            <h2>Missed Deadlines</h2>
-            <p class="muted">Red blocks that are now overdue (shown as risk).</p>
+            <h2>Deadlines</h2>
+            <p class="muted">Switch between completed and missed deadlines.</p>
           </div>
         </div>
+      
+        <div class="tabs">
+          <button class="tabBtn active" id="tabCompleted" type="button">Completed Deadlines</button>
+          <button class="tabBtn" id="tabMissed" type="button">Missed Deadlines</button>
+        </div>
+      
         <div class="tableWrap">
-          <table class="table" id="missedTable">
-            <thead>
-              <tr>
-                <th>Task</th>
-                <th>Deadline</th>
-                <th>Date</th>
-                <th class="right">Days Overdue</th>
-              </tr>
-            </thead>
+          <table class="table" id="deadlinesTable">
+            <thead id="deadlinesThead"></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="empty" id="missedEmpty">No missed items detected.</div>
+      
+        <div class="empty" id="deadlinesEmpty">No items found.</div>
       </div>
+
 
       <div class="card">
         <div class="cardHead">
