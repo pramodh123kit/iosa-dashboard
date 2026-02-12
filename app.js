@@ -30,6 +30,9 @@ searchEl.addEventListener("input", () => render());
 
 let state = null;
 
+let activeDeadlineTab = "completed"; // ✅ default selected
+
+
 async function load() {
   lastUpdatedEl.textContent = "Loading latest upload…";
   state = null;
@@ -49,6 +52,8 @@ async function load() {
   )}`;
 
   render();
+  wireDeadlineTabs();
+
 }
 
 function render() {
@@ -93,7 +98,19 @@ function render() {
       x.monthName.toLowerCase().includes(q)
   );
 
-  renderMissed(missedFiltered);
+    const completedFiltered = (d.completedList || []).filter(
+    (x) =>
+      !q ||
+      x.task.toLowerCase().includes(q) ||
+      x.deadline.toLowerCase().includes(q)
+  );
+
+  if (activeDeadlineTab === "missed"){
+    renderDeadlinesTable("missed", missedFiltered);
+  } else {
+    renderDeadlinesTable("completed", completedFiltered);
+  }
+
   renderUpcoming(upcomingFiltered);
   renderAudit(d.audits?.CAAL, "CAAL");
   renderAudit(d.audits?.IOSA, "IOSA");
@@ -130,6 +147,87 @@ function renderMissed(rows) {
     body.appendChild(tr);
   }
 }
+
+function renderDeadlinesTable(mode, rows){
+  const table = el("deadlinesTable");
+  const thead = el("deadlinesThead");
+  const body = table.querySelector("tbody");
+  const empty = el("deadlinesEmpty");
+
+  body.innerHTML = "";
+
+  // Header depends on tab
+  if (mode === "missed"){
+    thead.innerHTML = `
+      <tr>
+        <th>Task</th>
+        <th>Deadline</th>
+        <th>Date</th>
+        <th class="right">Days Overdue</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th>Task</th>
+        <th>Deadline</th>
+        <th>Date</th>
+      </tr>
+    `;
+  }
+
+  if (!rows.length){
+    empty.style.display = "block";
+    table.style.display = "none";
+    return;
+  }
+
+  empty.style.display = "none";
+  table.style.display = "table";
+
+  for (const r of rows.slice(0, 80)){
+    const tr = document.createElement("tr");
+
+    if (mode === "missed"){
+      tr.innerHTML = `
+        <td>${escape(r.task)}</td>
+        <td>${escape(r.deadline)}</td>
+        <td>${escape(r.date)}</td>
+        <td class="right">${escape(String(r.daysOverdue ?? ""))}</td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${escape(r.task)}</td>
+        <td>${escape(r.deadline)}</td>
+        <td>${escape(r.date)}</td>
+      `;
+    }
+
+    body.appendChild(tr);
+  }
+}
+
+function wireDeadlineTabs(){
+  const btnCompleted = el("tabCompleted");
+  const btnMissed = el("tabMissed");
+
+  if (!btnCompleted || !btnMissed) return;
+
+  btnCompleted.onclick = () => {
+    activeDeadlineTab = "completed";
+    btnCompleted.classList.add("active");
+    btnMissed.classList.remove("active");
+    render(); // re-render table with same search query
+  };
+
+  btnMissed.onclick = () => {
+    activeDeadlineTab = "missed";
+    btnMissed.classList.add("active");
+    btnCompleted.classList.remove("active");
+    render();
+  };
+}
+
 
 function renderUpcoming(items) {
   const list = el("upcomingList");
