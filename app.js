@@ -125,8 +125,7 @@ function renderMissed(rows) {
   const body = table.querySelector("tbody");
   const empty = el("missedEmpty");
   if (!table || !thead || !empty) return; // ✅ safety
-   const body = table.querySelector("tbody");
-  if (!body) return; // ✅ safety
+  
 
   body.innerHTML = "";
 
