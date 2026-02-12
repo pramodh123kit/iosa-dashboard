@@ -7,6 +7,131 @@ const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
 const searchToggle = el("searchToggle");
 
+const kpiTooltip = el("kpiTooltip");
+const kpiTooltipTitle = el("kpiTooltipTitle");
+const kpiTooltipBody = el("kpiTooltipBody");
+
+function positionTooltipNear(element){
+  const r = element.getBoundingClientRect();
+  const pad = 10;
+
+  // Prefer below card, fallback above if not enough space
+  const desiredTop = r.bottom + pad;
+  const desiredLeft = Math.min(r.left, window.innerWidth - (kpiTooltip.offsetWidth || 520) - pad);
+
+  kpiTooltip.style.left = `${Math.max(pad, desiredLeft)}px`;
+
+  // If would overflow bottom, show above
+  const approxHeight = Math.min(420, kpiTooltip.scrollHeight || 320);
+  if (desiredTop + approxHeight > window.innerHeight - pad) {
+    kpiTooltip.style.top = `${Math.max(pad, r.top - approxHeight - pad)}px`;
+  } else {
+    kpiTooltip.style.top = `${desiredTop}px`;
+  }
+}
+
+function wireKpiHover(){
+  // KPI cards are the 5 elements inside ".kpis"
+  const kpiCards = document.querySelectorAll(".kpis .card.kpi");
+  if (kpiCards.length < 5) return;
+
+  const d = state?.dashboard;
+  if (!d) return;
+
+  const items = d.items || [];
+  const today = d.today || (new Date().toISOString().slice(0,10));
+  const in14 = addDaysISOClient(today, 14);
+
+  const plannedList = items;
+  const completedList = items.filter(x => x.status === "completed");
+  const dueSoonList = items.filter(x => x.status === "pending" && x.date >= today && x.date <= in14);
+  const missedList = d.missedList || [];
+
+  // 0: progress (skip tooltip)
+  // 1: total planned
+  // 2: completed
+  // 3: due soon
+  // 4: missed
+
+  const bindings = [
+    null,
+    { title: `Total Planned Items (${plannedList.length})`, rows: plannedList.map(fmtItemRow).join("") },
+    { title: `Completed (${completedList.length})`, rows: completedList.map(fmtItemRow).join("") },
+    { title: `Due Soon (14 days) (${dueSoonList.length})`, rows: dueSoonList.map(fmtItemRow).join("") },
+    { title: `Missed Deadlines (${missedList.length})`, rows: missedList.map(fmtMissedRow).join("") },
+  ];
+
+  kpiCards.forEach((card, idx) => {
+    const b = bindings[idx];
+    if (!b) return;
+
+    // remove previous listeners (simple way: replace with clone)
+    const clone = card.cloneNode(true);
+    card.parentNode.replaceChild(clone, card);
+
+    clone.addEventListener("mouseenter", () => showTooltip(b.title, b.rows, clone));
+    clone.addEventListener("mousemove", () => positionTooltipNear(clone));
+    clone.addEventListener("mouseleave", hideTooltip);
+  });
+
+  // close tooltip if user scrolls/resizes
+  window.addEventListener("scroll", hideTooltip, { passive: true });
+  window.addEventListener("resize", hideTooltip);
+}
+
+
+function showTooltip(title, rowsHtml, anchorEl){
+  kpiTooltipTitle.textContent = title;
+  kpiTooltipBody.innerHTML = rowsHtml || `<div class="muted">No items.</div>`;
+  kpiTooltip.style.display = "block";
+
+  // need a tick so width/height exist
+  requestAnimationFrame(() => positionTooltipNear(anchorEl));
+}
+
+function hideTooltip(){
+  kpiTooltip.style.display = "none";
+}
+
+function fmtItemRow(it){
+  const deadline = it.deadlineLabel ? it.deadlineLabel : `${it.monthName} W${it.weekOfMonth}`;
+  const status = it.status || "";
+  return `
+    <div class="kpiTooltipRow">
+      <div class="kpiTooltipRowTop">
+        <div>${escape(it.task)}</div>
+        <div class="kpiTooltipPill">${escape(it.date)} • ${escape(status)}</div>
+      </div>
+      <div class="kpiTooltipMeta">${escape(deadline)}</div>
+    </div>
+  `;
+}
+
+function fmtMissedRow(m){
+  return `
+    <div class="kpiTooltipRow">
+      <div class="kpiTooltipRowTop">
+        <div>${escape(m.task)}</div>
+        <div class="kpiTooltipPill">${escape(m.date)} • ${escape(String(m.daysOverdue))}d</div>
+      </div>
+      <div class="kpiTooltipMeta">${escape(m.deadline)}</div>
+    </div>
+  `;
+}
+
+function parseISO(s){
+  // safe parse yyyy-mm-dd
+  const [y,m,d] = String(s).split("-").map(Number);
+  return new Date(Date.UTC(y, (m||1)-1, d||1));
+}
+
+function addDaysISOClient(iso, days){
+  const dt = parseISO(iso);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0,10);
+}
+
+
 searchToggle.addEventListener("click", () => {
   document.body.classList.toggle("search-open");
   // focus input when opened
@@ -99,6 +224,7 @@ function render(){
   renderPanel("inspectionsPanel", d.panels?.inspections, "Inspections");
 
   renderHeatmap(d.weekly || []);
+  wireKpiHover();
 }
 
 function renderMissed(rows){
