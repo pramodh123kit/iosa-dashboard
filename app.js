@@ -250,7 +250,6 @@ function renderUpcoming(items) {
     div.innerHTML = `
       <div class="itemTop">
         <div class="itemTitle">${escape(it.task)}</div>
-        // <div class="badge">${escape(it.date)}</div>
       </div>
       <div class="itemMeta">
         ${escape(it.monthName)} • Week ${escape(String(it.weekOfMonth))}
