@@ -287,6 +287,15 @@ function renderPanel(containerId, panel) {
     ? `Next: ${escape(panel.next.task)} (${escape(panel.next.date)})`
     : "No upcoming scheduled items.";
 
+  // ✅ build breakdown lines (if any)
+  let completedSub = "";
+  if (panel.completedByTask) {
+    const lines = Object.entries(panel.completedByTask)
+      .map(([k, v]) => `${escape(k)} = ${escape(String(v))}`)
+      .join("<br/>");
+    completedSub = `<div class="miniSub">${lines}</div>`;
+  }
+
   c.innerHTML = `
     <div class="miniRow">
       <div class="miniLeft">
@@ -295,24 +304,32 @@ function renderPanel(containerId, panel) {
       </div>
       <div class="miniRight pct">${panel.percent}%</div>
     </div>
+
     <div class="miniRow">
       <div class="miniLeft"><div class="miniTitle">Planned</div></div>
       <div class="miniRight">${panel.planned}</div>
     </div>
+
     <div class="miniRow">
-      <div class="miniLeft"><div class="miniTitle">Completed</div></div>
+      <div class="miniLeft">
+        <div class="miniTitle">Completed</div>
+        ${completedSub}
+      </div>
       <div class="miniRight">${panel.completed}</div>
     </div>
+
     <div class="miniRow">
       <div class="miniLeft"><div class="miniTitle">Due Soon</div></div>
       <div class="miniRight">${panel.dueSoon}</div>
     </div>
+
     <div class="miniRow">
       <div class="miniLeft"><div class="miniTitle">Missed</div></div>
       <div class="miniRight">${panel.missed}</div>
     </div>
   `;
 }
+
 
 function renderHeatmap(weeks) {
   const hm = el("heatmap");
