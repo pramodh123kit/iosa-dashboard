@@ -76,7 +76,7 @@ function render() {
     return;
   }
 
-  setText("kpiScore", `${d.kpis.complianceScore}%`);
+  setText("kpiScore", `${Math.round((d.kpis.completed / d.kpis.totalPlanned) * 100)}%`);
   setText("kpiTotal", `${d.kpis.totalPlanned}`);
   setText("kpiCompleted", `${d.kpis.completed}`);
   setText("kpiDueSoon", `${d.kpis.dueSoon}`);
