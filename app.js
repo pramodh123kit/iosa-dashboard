@@ -82,6 +82,7 @@ function render() {
     renderPanel("staffingPanel", null);
     renderPanel("inspectionsPanel", null);
     renderHeatmap([]);
+    renderLordControl(null);
     return;
   }
 
@@ -127,6 +128,7 @@ function render() {
   renderPanel("staffingPanel", d.panels?.staffing);
   renderPanel("inspectionsPanel", d.panels?.inspections);
   renderHeatmap(d.weekly || []);
+  renderLordControl(state?.lordControl);
 }
 
 function renderMissed(rows) {
@@ -337,6 +339,19 @@ function renderPanel(containerId, panel) {
       <div class="miniRight">${panel.missed}</div>
     </div>
   `;
+}
+
+function renderLordControl(lord){
+  setText("lordCutoff", lord?.cutoff ?? "—");
+  setText("lordPercent", lord ? `${lord.percent}%` : "—");
+  setText("lordGreen", lord?.green ?? "—");
+  setText("lordEligible", lord?.eligible ?? "—");
+
+  const pill = el("lordPctPill");
+  if (pill){
+    if (!lord) pill.textContent = "—";
+    else pill.textContent = `${lord.percent}% (${lord.green}/${lord.eligible})`;
+  }
 }
 
 
