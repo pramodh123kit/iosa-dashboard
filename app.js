@@ -47,6 +47,15 @@ async function load() {
   }
 
   state = data;
+
+  console.log("Lord control metric:", data.lordControl);
+
+  if (data.lordControl) {
+    console.log(
+      `Lord control % green (nomination before ${data.lordControl.cutoff}): ${data.lordControl.percent}% (${data.lordControl.green}/${data.lordControl.eligible})`
+    );
+  }
+  
   lastUpdatedEl.textContent = `Loaded: ${data.sourceFile.name} • Updated: ${fmtDateTime(
     data.sourceFile.updatedIso
   )}`;
