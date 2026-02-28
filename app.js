@@ -7,6 +7,8 @@ const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
 const searchToggle = el("searchToggle");
+const lordDateEl = el("lordDate");
+const lordApplyBtn = el("lordApply");
 
 searchToggle.addEventListener("click", () => {
   document.body.classList.toggle("search-open");
@@ -47,7 +49,16 @@ async function load() {
   }
 
   state = data;
-
+  // ✅ set default date picker value to backend cutoff (first load)
+  if (lordDateEl && data.lordControl?.cutoff) {
+    lordDateEl.value = data.lordControl.cutoff;
+  }
+  
+  // ✅ Apply button: load for selected date
+  if (lordApplyBtn && lordDateEl) {
+    lordApplyBtn.onclick = () => refreshLordForDate(lordDateEl.value);
+  }
+  
   console.log("Lord control metric:", data.lordControl);
 
   if (data.lordControl) {
@@ -344,13 +355,17 @@ function renderPanel(containerId, panel) {
 function renderLordControl(lord){
   setText("lordCutoff", lord?.cutoff ?? "—");
   setText("lordPercent", lord ? `${lord.percent}%` : "—");
-  setText("lordGreen", lord?.green ?? "—");
-  setText("lordEligible", lord?.eligible ?? "—");
 
   const pill = el("lordPctPill");
   if (pill){
     if (!lord) pill.textContent = "—";
     else pill.textContent = `${lord.percent}% (${lord.green}/${lord.eligible})`;
+  }
+
+  const counts = el("lordCounts");
+  if (counts){
+    if (!lord) counts.textContent = "—";
+    else counts.textContent = `Completed: ${lord.green} • Total eligible: ${lord.eligible}`;
   }
 }
 
@@ -414,3 +429,27 @@ function escape(s) {
 }
 
 load();
+
+async function refreshLordForDate(dateIso){
+  if (!dateIso) return;
+
+  // show immediate UI feedback
+  const pill = el("lordPctPill");
+  if (pill) pill.textContent = "Loading…";
+  setText("lordCutoff", dateIso);
+
+  const url = `${API_URL}?lordDate=${encodeURIComponent(dateIso)}`;
+  const res = await fetch(url, { cache: "no-store" });
+  const data = await res.json();
+
+  if (!data.ok) {
+    if (pill) pill.textContent = "Error";
+    return;
+  }
+
+  // keep main dashboard state as-is, but update lordControl
+  state = state || {};
+  state.lordControl = data.lordControl;
+
+  renderLordControl(state.lordControl);
+}
