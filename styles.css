@@ -550,3 +550,21 @@ h2{ font-size: 16px; }
   font-size:13px;
   box-shadow: 0 8px 20px rgba(17,24,39,0.06);
 }
+
+.lordBody.twoCols{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  align-items:start;
+}
+
+.lordCol{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.lordCol.rightCol{
+  align-items:flex-end;
+  text-align:right;
+}
