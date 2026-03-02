@@ -353,19 +353,26 @@ function renderPanel(containerId, panel) {
 }
 
 function renderLordControl(lord){
+  // Baseline (left)
+  const base = lord?.baseline;
   setText("lordCutoff", lord?.cutoff ?? "—");
-  setText("lordPercent", lord ? `${lord.percent}%` : "—");
+  setText("lordPercentBase", base ? `${base.percent}%` : "—");
+  setText("lordCountsBase", base ? `Completed: ${base.green} • Total eligible: ${base.eligible}` : "—");
 
+  // As-of (right)
+  const asOf = lord?.asOf;
+  setText("lordAsOfDate", asOf?.date ?? "—");
+  setText("lordPercentAsOf", asOf ? `${asOf.percentOfBaseline}%` : "—");
+  setText("lordCountsAsOf", asOf ? `Completed before date: ${asOf.green} • (out of ${base?.eligible ?? "—"})` : "—");
+
+  // Pill (optional): show both
   const pill = el("lordPctPill");
   if (pill){
-    if (!lord) pill.textContent = "—";
-    else pill.textContent = `${lord.percent}% (${lord.green}/${lord.eligible})`;
-  }
-
-  const counts = el("lordCounts");
-  if (counts){
-    if (!lord) counts.textContent = "—";
-    else counts.textContent = `Completed: ${lord.green} • Total eligible: ${lord.eligible}`;
+    if (!lord || !base) pill.textContent = "—";
+    else {
+      const right = asOf ? ` • As-of: ${asOf.percentOfBaseline}%` : "";
+      pill.textContent = `Base: ${base.percent}% (${base.green}/${base.eligible})${right}`;
+    }
   }
 }
 
@@ -438,7 +445,7 @@ async function refreshLordForDate(dateIso){
   if (pill) pill.textContent = "Loading…";
   setText("lordCutoff", dateIso);
 
-  const url = `${API_URL}?lordDate=${encodeURIComponent(dateIso)}`;
+  const url = `${API_URL}?lordAsOf=${encodeURIComponent(dateIso)}`;
   const res = await fetch(url, { cache: "no-store" });
   const data = await res.json();
 
