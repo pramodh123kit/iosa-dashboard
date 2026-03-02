@@ -173,24 +173,36 @@
           <div>
             <h2>Load Control Training</h2>
             <p class="muted">
-              Completed before <span id="lordCutoff">—</span>
+              Baseline cutoff: <span id="lordCutoff">—</span>
             </p>
           </div>
     
+          <!-- Optional pill summary -->
           <div class="pill" id="lordPctPill">—</div>
         </div>
     
-        <div class="lordBody">
-          <div class="lordBig" id="lordPercent">—</div>
+        <!-- Two-column body -->
+        <div class="lordBody twoCols">
+          <!-- LEFT: baseline (Nomination < June 30, 2026) -->
+          <div class="lordCol">
+            <div class="muted">Baseline completion</div>
+            <div class="lordBig" id="lordPercentBase">—</div>
+            <div class="lordCounts" id="lordCountsBase">—</div>
+          </div>
     
-          <div class="lordMeta">
-            <!-- ✅ date controls -->
+          <!-- RIGHT: as-of selected date (within same baseline denominator) -->
+          <div class="lordCol rightCol">
             <div class="lordControls">
               <input type="date" id="lordDate" class="lordDate" />
               <button type="button" class="tabBtn" id="lordApply">Apply</button>
             </div>
     
-            <div class="lordCounts" id="lordCounts">—</div>
+            <div class="muted" style="margin-top:6px;">
+              As of <span id="lordAsOfDate">—</span>
+            </div>
+    
+            <div class="lordBig" id="lordPercentAsOf">—</div>
+            <div class="lordCounts" id="lordCountsAsOf">—</div>
           </div>
         </div>
       </div>
