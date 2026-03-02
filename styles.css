@@ -569,8 +569,4 @@ h2{ font-size: 16px; }
   text-align:right;
 }
 
-@media screen and (max-width: 720px) {
-  .lordBody.twoCols {
-    grid-template-columns: auto;
-  }
-}
+
