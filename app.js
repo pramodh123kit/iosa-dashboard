@@ -343,6 +343,13 @@ function renderTrainingsTable(rows, showDepartment) {
 
   body.innerHTML = "";
 
+  if (!rows.length) {
+    thead.innerHTML = "";
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+
   thead.innerHTML = `
     <tr>
       <th>Training</th>
@@ -357,12 +364,6 @@ function renderTrainingsTable(rows, showDepartment) {
       <th class="right">Jul Comp</th>
     </tr>
   `;
-
-  if (!rows.length) {
-    table.style.display = "none";
-    empty.style.display = "block";
-    return;
-  }
 
   table.style.display = "table";
   empty.style.display = "none";
