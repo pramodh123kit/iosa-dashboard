@@ -608,3 +608,44 @@ h2{ font-size: 16px; }
 #trainingsTable tbody tr:hover td.completed {
   background: rgba(22, 163, 74, 0.15);
 }
+
+.trainingKpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
+.trainingKpi {
+  min-height: 96px;
+}
+
+.trainingKpiRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.trainingKpi .kpiValue {
+  font-size: 20px;
+  margin: 0;
+}
+
+.trainingKpiSide {
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .trainingKpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .trainingKpis {
+    grid-template-columns: 1fr;
+  }
+}
