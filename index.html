@@ -228,27 +228,20 @@
           </div>
         </section>
 
-        <div class="tableWrap">
-          <table class="table" id="trainingsTable">
-            <thead id="trainingsThead">
-              <tr>
-                <th>Training</th>
-                <th class="right">Forecast</th>
-                <th class="right">Apr Nom</th>
-                <th class="right">Apr Comp</th>
-                <th class="right">May Nom</th>
-                <th class="right">May Comp</th>
-                <th class="right">Jun Nom</th>
-                <th class="right">Jun Comp</th>
-                <th class="right">Jul Nom</th>
-                <th class="right">Jul Comp</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <div class="trainingsTableControls">
+          <button type="button" class="tabBtn" id="toggleTrainingsTable">Expand table</button>
         </div>
-
-        <div class="empty" id="trainingsEmpty"></div>
+        
+        <div class="trainingsTableShell collapsed hidden" id="trainingsTableShell">
+          <div class="tableWrap">
+            <table class="table" id="trainingsTable">
+              <thead id="trainingsThead"></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        
+          <div class="empty" id="trainingsEmpty">No training data found.</div>
+        </div> 
       </div>
     </section>
 
