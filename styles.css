@@ -569,4 +569,6 @@ h2{ font-size: 16px; }
   text-align:right;
 }
 
-
+#trainingTabs {
+  flex-wrap: wrap;
+}
