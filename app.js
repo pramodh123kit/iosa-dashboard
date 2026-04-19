@@ -69,6 +69,21 @@ function render() {
   const d = state?.dashboard;
 
   if (!d) {
+
+    setText("trainingForecastPct", "—");
+    setText("trainingForecastCounts", "—");
+    
+    setText("trainingAprilPct", "—");
+    setText("trainingAprilCounts", "—");
+    
+    setText("trainingMayPct", "—");
+    setText("trainingMayCounts", "—");
+    
+    setText("trainingJunePct", "—");
+    setText("trainingJuneCounts", "—");
+    
+    setText("trainingJulyPct", "—");
+    setText("trainingJulyCounts", "—");
     setText("kpiScore", "—");
     setText("kpiTotal", "—");
     setText("kpiCompleted", "—");
@@ -130,6 +145,7 @@ function render() {
   renderHeatmap(d.weekly || []);
 
   const trainingRows = state?.trainings?.[activeTrainingTab] || [];
+  renderTrainingKpis(trainingRows);
   renderTrainingsTable(trainingRows);
 }
 
@@ -298,6 +314,55 @@ function renderTrainingsTable(rows) {
     `;
     body.appendChild(tr);
   }
+}
+
+function sumBy(rows, key) {
+  return (rows || []).reduce((sum, r) => sum + Number(r[key] || 0), 0);
+}
+
+function pct(numerator, denominator) {
+  if (!denominator) return null;
+  return Math.round((numerator / denominator) * 100);
+}
+
+function renderTrainingKpis(rows) {
+  const forecast = sumBy(rows, "forecast");
+
+  const aprilNom = sumBy(rows, "aprilNominated");
+  const aprilComp = sumBy(rows, "aprilCompleted");
+
+  const mayNom = sumBy(rows, "mayNominated");
+  const mayComp = sumBy(rows, "mayCompleted");
+
+  const juneNom = sumBy(rows, "juneNominated");
+  const juneComp = sumBy(rows, "juneCompleted");
+
+  const julyNom = sumBy(rows, "julyNominated");
+  const julyComp = sumBy(rows, "julyCompleted");
+
+  // Total Forecast card:
+  // using completed so far across all months / total forecast
+  const totalCompleted = aprilComp + mayComp + juneComp + julyComp;
+  const forecastPct = pct(totalCompleted, forecast);
+
+  setText("trainingForecastPct", forecast ? `${forecastPct ?? 0}%` : "0%");
+  setText("trainingForecastCounts", `${totalCompleted} / ${forecast}`);
+
+  // April
+  setText("trainingAprilPct", aprilNom ? `${pct(aprilComp, aprilNom) ?? 0}%` : "—");
+  setText("trainingAprilCounts", `${aprilComp} / ${aprilNom}`);
+
+  // May
+  setText("trainingMayPct", mayNom ? `${pct(mayComp, mayNom) ?? 0}%` : "—");
+  setText("trainingMayCounts", `${mayComp} / ${mayNom}`);
+
+  // June
+  setText("trainingJunePct", juneNom ? `${pct(juneComp, juneNom) ?? 0}%` : "—");
+  setText("trainingJuneCounts", juneComp || juneNom ? `${juneComp} / ${juneNom}` : "None");
+
+  // July
+  setText("trainingJulyPct", julyNom ? `${pct(julyComp, julyNom) ?? 0}%` : "—");
+  setText("trainingJulyCounts", `${julyComp} / ${julyNom}`);
 }
 
 
