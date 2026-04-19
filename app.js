@@ -194,8 +194,13 @@ function renderMissed(rows) {
 function renderDeadlinesTable(mode, rows){
   const table = el("deadlinesTable");
   const thead = el("deadlinesThead");
-  const body = table.querySelector("tbody");
   const empty = el("deadlinesEmpty");
+
+  // ✅ guard clause (prevents crash)
+  if (!table || !thead || !empty) return;
+
+  const body = table.querySelector("tbody");
+  if (!body) return;
 
   body.innerHTML = "";
 
