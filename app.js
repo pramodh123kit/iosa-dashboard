@@ -4,7 +4,7 @@ const API_URL =
 const el = (id) => document.getElementById(id);
 
 let activeDeadlineTab = "completed";
-let activeTrainingTab = "PAX";
+let activeTrainingTab = "TOTAL";
 
 const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
@@ -144,9 +144,9 @@ function render() {
   renderPanel("inspectionsPanel", d.panels?.inspections);
   renderHeatmap(d.weekly || []);
 
-  const trainingRows = state?.trainings?.[activeTrainingTab] || [];
+  const trainingRows = getTrainingRowsForTab(state?.trainings, activeTrainingTab);
   renderTrainingKpis(trainingRows);
-  renderTrainingsTable(trainingRows);
+  renderTrainingsTable(trainingRows, activeTrainingTab === "TOTAL");
 }
 
 function renderMissed(rows) {
@@ -275,14 +275,48 @@ function wireTrainingTabs() {
   });
 }
 
-function renderTrainingsTable(rows) {
+function renderTrainingsTable(rows, showDepartment) {
   const table = el("trainingsTable");
+  const thead = el("trainingsThead");
   const body = table ? table.querySelector("tbody") : null;
   const empty = el("trainingsEmpty");
 
-  if (!table || !body || !empty) return;
+  if (!table || !body || !empty || !thead) return;
 
   body.innerHTML = "";
+
+  if (showDepartment) {
+    thead.innerHTML = `
+      <tr>
+        <th>Department</th>
+        <th>Training</th>
+        <th class="right">Forecast</th>
+        <th class="right">Apr Nom</th>
+        <th class="right">Apr Comp</th>
+        <th class="right">May Nom</th>
+        <th class="right">May Comp</th>
+        <th class="right">Jun Nom</th>
+        <th class="right">Jun Comp</th>
+        <th class="right">Jul Nom</th>
+        <th class="right">Jul Comp</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th>Training</th>
+        <th class="right">Forecast</th>
+        <th class="right">Apr Nom</th>
+        <th class="right">Apr Comp</th>
+        <th class="right">May Nom</th>
+        <th class="right">May Comp</th>
+        <th class="right">Jun Nom</th>
+        <th class="right">Jun Comp</th>
+        <th class="right">Jul Nom</th>
+        <th class="right">Jul Comp</th>
+      </tr>
+    `;
+  }
 
   if (!rows.length) {
     table.style.display = "none";
@@ -295,23 +329,36 @@ function renderTrainingsTable(rows) {
 
   for (const r of rows) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${escape(r.training)}</td>
 
-      <td class="right forecast">${escape(String(r.forecast))}</td>
-    
-      <td class="right nominated">${escape(String(r.aprilNominated))}</td>
-      <td class="right completed">${escape(String(r.aprilCompleted))}</td>
-    
-      <td class="right nominated">${escape(String(r.mayNominated))}</td>
-      <td class="right completed">${escape(String(r.mayCompleted))}</td>
-    
-      <td class="right nominated">${escape(String(r.juneNominated))}</td>
-      <td class="right completed">${escape(String(r.juneCompleted))}</td>
-    
-      <td class="right nominated">${escape(String(r.julyNominated))}</td>
-      <td class="right completed">${escape(String(r.julyCompleted))}</td>
-    `;
+    if (showDepartment) {
+      tr.innerHTML = `
+        <td>${escape(r.department || "")}</td>
+        <td>${escape(r.training)}</td>
+        <td class="right forecast">${escape(String(r.forecast))}</td>
+        <td class="right nominated">${escape(String(r.aprilNominated))}</td>
+        <td class="right completed">${escape(String(r.aprilCompleted))}</td>
+        <td class="right nominated">${escape(String(r.mayNominated))}</td>
+        <td class="right completed">${escape(String(r.mayCompleted))}</td>
+        <td class="right nominated">${escape(String(r.juneNominated))}</td>
+        <td class="right completed">${escape(String(r.juneCompleted))}</td>
+        <td class="right nominated">${escape(String(r.julyNominated))}</td>
+        <td class="right completed">${escape(String(r.julyCompleted))}</td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${escape(r.training)}</td>
+        <td class="right forecast">${escape(String(r.forecast))}</td>
+        <td class="right nominated">${escape(String(r.aprilNominated))}</td>
+        <td class="right completed">${escape(String(r.aprilCompleted))}</td>
+        <td class="right nominated">${escape(String(r.mayNominated))}</td>
+        <td class="right completed">${escape(String(r.mayCompleted))}</td>
+        <td class="right nominated">${escape(String(r.juneNominated))}</td>
+        <td class="right completed">${escape(String(r.juneCompleted))}</td>
+        <td class="right nominated">${escape(String(r.julyNominated))}</td>
+        <td class="right completed">${escape(String(r.julyCompleted))}</td>
+      `;
+    }
+
     body.appendChild(tr);
   }
 }
@@ -323,6 +370,32 @@ function sumBy(rows, key) {
 function pct(numerator, denominator) {
   if (!denominator) return null;
   return Math.round((numerator / denominator) * 100);
+}
+
+function getTrainingRowsForTab(trainings, tabName) {
+  if (!trainings) return [];
+
+  if (tabName === "TOTAL") {
+    const order = ["PAX", "RAMP", "AIS", "LOD", "P&E", "UTILITY"];
+    const combined = [];
+
+    for (const dept of order) {
+      const rows = trainings[dept] || [];
+      for (const r of rows) {
+        combined.push({
+          ...r,
+          department: dept
+        });
+      }
+    }
+
+    return combined;
+  }
+
+  return (trainings[tabName] || []).map((r) => ({
+    ...r,
+    department: tabName
+  }));
 }
 
 function renderTrainingKpis(rows) {
