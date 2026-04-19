@@ -99,7 +99,7 @@ function render() {
     renderPanel("staffingPanel", null);
     renderPanel("inspectionsPanel", null);
     renderHeatmap([]);
-    renderTrainingsTable([], false);
+    renderTrainingsTable([]);
     renderTrainingTableVisibility();
     return;
   }
@@ -152,11 +152,11 @@ function render() {
   
   renderTrainingKpis(trainingRows);
   
-  if (isTotalTab) {
-    renderTrainingsTable([], false);
-  } else {
-    renderTrainingsTable(trainingRows, false);
-  }
+ if (isTotalTab) {
+  renderTrainingsTable([]);
+} else {
+  renderTrainingsTable(trainingRows);
+}
   
   renderTrainingTableVisibility();
 }
@@ -333,7 +333,7 @@ function renderTrainingTableVisibility() {
   }
 }
 
-function renderTrainingsTable(rows, showDepartment) {
+function renderTrainingsTable(rows) {
   const table = el("trainingsTable");
   const thead = el("trainingsThead");
   const body = table ? table.querySelector("tbody") : null;
@@ -342,6 +342,13 @@ function renderTrainingsTable(rows, showDepartment) {
   if (!table || !body || !empty || !thead) return;
 
   body.innerHTML = "";
+
+  if (!rows.length) {
+    thead.innerHTML = "";
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
 
   thead.innerHTML = `
     <tr>
@@ -357,12 +364,6 @@ function renderTrainingsTable(rows, showDepartment) {
       <th class="right">Jul Comp</th>
     </tr>
   `;
-
-  if (!rows.length) {
-    table.style.display = "none";
-    empty.style.display = "block";
-    return;
-  }
 
   table.style.display = "table";
   empty.style.display = "none";
