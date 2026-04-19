@@ -3,6 +3,9 @@ const API_URL =
 
 const el = (id) => document.getElementById(id);
 
+let activeDeadlineTab = "completed";
+let activeTrainingTab = "PAX";
+
 const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
@@ -47,6 +50,12 @@ async function load() {
   }
 
   state = data;
+
+  if (data.trainingsSourceFile) {
+    setText("trainingsSource", `Training file: ${data.trainingsSourceFile.name}`);
+  } else {
+    setText("trainingsSource", "No training file");
+  }
   
   lastUpdatedEl.textContent = `Loaded: ${data.sourceFile.name} • Updated: ${fmtDateTime(
     data.sourceFile.updatedIso
@@ -54,8 +63,10 @@ async function load() {
 
   render();
   wireDeadlineTabs();
+  wireTrainingTabs();
 
 }
+
 
 function render() {
   const d = state?.dashboard;
@@ -74,6 +85,7 @@ function render() {
     renderPanel("staffingPanel", null);
     renderPanel("inspectionsPanel", null);
     renderHeatmap([]);
+    renderTrainingsTable([]);
     return;
   }
 
@@ -119,6 +131,9 @@ function render() {
   renderPanel("staffingPanel", d.panels?.staffing);
   renderPanel("inspectionsPanel", d.panels?.inspections);
   renderHeatmap(d.weekly || []);
+
+  const trainingRows = state?.trainings?.[activeTrainingTab] || [];
+  renderTrainingsTable(trainingRows);
 }
 
 function renderMissed(rows) {
@@ -229,6 +244,58 @@ function wireDeadlineTabs(){
     btnCompleted.classList.remove("active");
     render();
   };
+}
+
+function wireTrainingTabs() {
+  const btns = document.querySelectorAll("[data-training-tab]");
+  if (!btns.length) return;
+
+  btns.forEach((btn) => {
+    btn.onclick = () => {
+      activeTrainingTab = btn.getAttribute("data-training-tab");
+
+      btns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      render();
+    };
+  });
+}
+
+function renderTrainingsTable(rows) {
+  const table = el("trainingsTable");
+  const body = table ? table.querySelector("tbody") : null;
+  const empty = el("trainingsEmpty");
+
+  if (!table || !body || !empty) return;
+
+  body.innerHTML = "";
+
+  if (!rows.length) {
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+
+  table.style.display = "table";
+  empty.style.display = "none";
+
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escape(r.training)}</td>
+      <td class="right">${escape(String(r.forecast))}</td>
+      <td class="right">${escape(String(r.aprilNominated))}</td>
+      <td class="right">${escape(String(r.aprilCompleted))}</td>
+      <td class="right">${escape(String(r.mayNominated))}</td>
+      <td class="right">${escape(String(r.mayCompleted))}</td>
+      <td class="right">${escape(String(r.juneNominated))}</td>
+      <td class="right">${escape(String(r.juneCompleted))}</td>
+      <td class="right">${escape(String(r.julyNominated))}</td>
+      <td class="right">${escape(String(r.julyCompleted))}</td>
+    `;
+    body.appendChild(tr);
+  }
 }
 
 
