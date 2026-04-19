@@ -287,9 +287,11 @@ function wireTrainingTabs() {
       btns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // Total should never show the table.
-      // Department tabs start collapsed by default.
-      trainingTableExpanded = false;
+      // Keep current expand/collapse state when switching tabs.
+      // But if user switches to TOTAL, force table hidden.
+      if (activeTrainingTab === "TOTAL") {
+        trainingTableExpanded = false;
+      }
 
       render();
     };
