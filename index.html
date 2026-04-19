@@ -165,6 +165,50 @@
         </div>
       </div>
     </section>
+
+    <section class="grid one">
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Trainings</h2>
+            <p class="muted">Forecast vs nominated vs completed by department.</p>
+          </div>
+          <div class="pill" id="trainingsSource">—</div>
+        </div>
+    
+        <div class="tabs" id="trainingTabs">
+          <button class="tabBtn active" type="button" data-training-tab="PAX">PAX</button>
+          <button class="tabBtn" type="button" data-training-tab="RAMP">RAMP</button>
+          <button class="tabBtn" type="button" data-training-tab="AIS">AIS</button>
+          <button class="tabBtn" type="button" data-training-tab="LOD">LOD</button>
+          <button class="tabBtn" type="button" data-training-tab="P&E">P&amp;E</button>
+          <button class="tabBtn" type="button" data-training-tab="UTILITY">UTILITY</button>
+        </div>
+    
+        <div class="tableWrap">
+          <table class="table" id="trainingsTable">
+            <thead id="trainingsThead">
+              <tr>
+                <th>Training</th>
+                <th class="right">Forecast</th>
+                <th class="right">Apr Nom</th>
+                <th class="right">Apr Comp</th>
+                <th class="right">May Nom</th>
+                <th class="right">May Comp</th>
+                <th class="right">Jun Nom</th>
+                <th class="right">Jun Comp</th>
+                <th class="right">Jul Nom</th>
+                <th class="right">Jul Comp</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+    
+        <div class="empty" id="trainingsEmpty">No training data found.</div>
+      </div>
+    </section>
+    
     
     <!-- TRAINING / STAFFING / INSPECTIONS -->
     <section class="grid three">
