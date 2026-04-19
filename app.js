@@ -62,6 +62,7 @@ async function load() {
   render();
   wireDeadlineTabs();
   wireTrainingTabs();
+  wireTrainingTableToggle();
 
 }
 
@@ -98,7 +99,8 @@ function render() {
     renderPanel("staffingPanel", null);
     renderPanel("inspectionsPanel", null);
     renderHeatmap([]);
-    renderTrainingsTable([]);
+    renderTrainingsTable([], false);
+    renderTrainingTableVisibility();
     return;
   }
 
@@ -146,8 +148,17 @@ function render() {
   renderHeatmap(d.weekly || []);
 
   const trainingRows = getTrainingRowsForTab(state?.trainings, activeTrainingTab);
+  const isTotalTab = activeTrainingTab === "TOTAL";
+  
   renderTrainingKpis(trainingRows);
-  renderTrainingsTable(trainingRows, activeTrainingTab === "TOTAL");
+  
+  if (isTotalTab) {
+    renderTrainingsTable([], false);
+  } else {
+    renderTrainingsTable(trainingRows, false);
+  }
+  
+  renderTrainingTableVisibility();
 }
 
 function renderMissed(rows) {
@@ -271,9 +282,50 @@ function wireTrainingTabs() {
       btns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
+      // Total should never show the table.
+      // Department tabs start collapsed by default.
+      trainingTableExpanded = false;
+
       render();
     };
   });
+}
+
+function wireTrainingTableToggle() {
+  const btn = el("toggleTrainingsTable");
+  if (!btn) return;
+
+  btn.onclick = () => {
+    trainingTableExpanded = !trainingTableExpanded;
+    renderTrainingTableVisibility();
+  };
+}
+
+function renderTrainingTableVisibility() {
+  const shell = el("trainingsTableShell");
+  const btn = el("toggleTrainingsTable");
+
+  if (!shell || !btn) return;
+
+  const isTotal = activeTrainingTab === "TOTAL";
+
+  if (isTotal) {
+    shell.classList.add("hidden");
+    shell.classList.add("collapsed");
+    btn.style.display = "none";
+    return;
+  }
+
+  btn.style.display = "inline-flex";
+  btn.textContent = trainingTableExpanded ? "Collapse table" : "Expand table";
+
+  shell.classList.remove("hidden");
+
+  if (trainingTableExpanded) {
+    shell.classList.remove("collapsed");
+  } else {
+    shell.classList.add("collapsed");
+  }
 }
 
 function renderTrainingsTable(rows, showDepartment) {
@@ -286,38 +338,20 @@ function renderTrainingsTable(rows, showDepartment) {
 
   body.innerHTML = "";
 
-  if (showDepartment) {
-    thead.innerHTML = `
-      <tr>
-        <th>Department</th>
-        <th>Training</th>
-        <th class="right">Forecast</th>
-        <th class="right">Apr Nom</th>
-        <th class="right">Apr Comp</th>
-        <th class="right">May Nom</th>
-        <th class="right">May Comp</th>
-        <th class="right">Jun Nom</th>
-        <th class="right">Jun Comp</th>
-        <th class="right">Jul Nom</th>
-        <th class="right">Jul Comp</th>
-      </tr>
-    `;
-  } else {
-    thead.innerHTML = `
-      <tr>
-        <th>Training</th>
-        <th class="right">Forecast</th>
-        <th class="right">Apr Nom</th>
-        <th class="right">Apr Comp</th>
-        <th class="right">May Nom</th>
-        <th class="right">May Comp</th>
-        <th class="right">Jun Nom</th>
-        <th class="right">Jun Comp</th>
-        <th class="right">Jul Nom</th>
-        <th class="right">Jul Comp</th>
-      </tr>
-    `;
-  }
+  thead.innerHTML = `
+    <tr>
+      <th>Training</th>
+      <th class="right">Forecast</th>
+      <th class="right">Apr Nom</th>
+      <th class="right">Apr Comp</th>
+      <th class="right">May Nom</th>
+      <th class="right">May Comp</th>
+      <th class="right">Jun Nom</th>
+      <th class="right">Jun Comp</th>
+      <th class="right">Jul Nom</th>
+      <th class="right">Jul Comp</th>
+    </tr>
+  `;
 
   if (!rows.length) {
     table.style.display = "none";
@@ -330,36 +364,18 @@ function renderTrainingsTable(rows, showDepartment) {
 
   for (const r of rows) {
     const tr = document.createElement("tr");
-
-    if (showDepartment) {
-      tr.innerHTML = `
-        <td>${escape(r.department || "")}</td>
-        <td>${escape(r.training)}</td>
-        <td class="right forecast">${escape(String(r.forecast))}</td>
-        <td class="right nominated">${escape(String(r.aprilNominated))}</td>
-        <td class="right completed">${escape(String(r.aprilCompleted))}</td>
-        <td class="right nominated">${escape(String(r.mayNominated))}</td>
-        <td class="right completed">${escape(String(r.mayCompleted))}</td>
-        <td class="right nominated">${escape(String(r.juneNominated))}</td>
-        <td class="right completed">${escape(String(r.juneCompleted))}</td>
-        <td class="right nominated">${escape(String(r.julyNominated))}</td>
-        <td class="right completed">${escape(String(r.julyCompleted))}</td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td>${escape(r.training)}</td>
-        <td class="right forecast">${escape(String(r.forecast))}</td>
-        <td class="right nominated">${escape(String(r.aprilNominated))}</td>
-        <td class="right completed">${escape(String(r.aprilCompleted))}</td>
-        <td class="right nominated">${escape(String(r.mayNominated))}</td>
-        <td class="right completed">${escape(String(r.mayCompleted))}</td>
-        <td class="right nominated">${escape(String(r.juneNominated))}</td>
-        <td class="right completed">${escape(String(r.juneCompleted))}</td>
-        <td class="right nominated">${escape(String(r.julyNominated))}</td>
-        <td class="right completed">${escape(String(r.julyCompleted))}</td>
-      `;
-    }
-
+    tr.innerHTML = `
+      <td>${escape(r.training)}</td>
+      <td class="right forecast">${escape(String(r.forecast))}</td>
+      <td class="right nominated">${escape(String(r.aprilNominated))}</td>
+      <td class="right completed">${escape(String(r.aprilCompleted))}</td>
+      <td class="right nominated">${escape(String(r.mayNominated))}</td>
+      <td class="right completed">${escape(String(r.mayCompleted))}</td>
+      <td class="right nominated">${escape(String(r.juneNominated))}</td>
+      <td class="right completed">${escape(String(r.juneCompleted))}</td>
+      <td class="right nominated">${escape(String(r.julyNominated))}</td>
+      <td class="right completed">${escape(String(r.julyCompleted))}</td>
+    `;
     body.appendChild(tr);
   }
 }
