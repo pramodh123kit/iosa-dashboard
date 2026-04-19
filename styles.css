@@ -649,3 +649,31 @@ h2{ font-size: 16px; }
     grid-template-columns: 1fr;
   }
 }
+
+.trainingsTableControls {
+  display: flex;
+  justify-content: flex-end;
+  margin: 8px 0 12px;
+}
+
+.trainingsTableShell {
+  overflow: hidden;
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 0.45s ease,
+    opacity 0.3s ease,
+    transform 0.35s ease;
+}
+
+.trainingsTableShell.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  margin-top: 0;
+}
+
+.trainingsTableShell.hidden {
+  display: none;
+}
