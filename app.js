@@ -281,15 +281,20 @@ function renderTrainingsTable(rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${escape(r.training)}</td>
-      <td class="right">${escape(String(r.forecast))}</td>
-      <td class="right">${escape(String(r.aprilNominated))}</td>
-      <td class="right">${escape(String(r.aprilCompleted))}</td>
-      <td class="right">${escape(String(r.mayNominated))}</td>
-      <td class="right">${escape(String(r.mayCompleted))}</td>
-      <td class="right">${escape(String(r.juneNominated))}</td>
-      <td class="right">${escape(String(r.juneCompleted))}</td>
-      <td class="right">${escape(String(r.julyNominated))}</td>
-      <td class="right">${escape(String(r.julyCompleted))}</td>
+
+      <td class="right forecast">${escape(String(r.forecast))}</td>
+    
+      <td class="right nominated">${escape(String(r.aprilNominated))}</td>
+      <td class="right completed">${escape(String(r.aprilCompleted))}</td>
+    
+      <td class="right nominated">${escape(String(r.mayNominated))}</td>
+      <td class="right completed">${escape(String(r.mayCompleted))}</td>
+    
+      <td class="right nominated">${escape(String(r.juneNominated))}</td>
+      <td class="right completed">${escape(String(r.juneCompleted))}</td>
+    
+      <td class="right nominated">${escape(String(r.julyNominated))}</td>
+      <td class="right completed">${escape(String(r.julyCompleted))}</td>
     `;
     body.appendChild(tr);
   }
