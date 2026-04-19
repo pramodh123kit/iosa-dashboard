@@ -78,26 +78,29 @@
             <p class="muted">Switch between completed and missed deadlines.</p>
           </div>
         </div>
-      
+
         <div class="tabs">
           <button class="tabBtn active" id="tabCompleted" type="button">Completed Deadlines</button>
           <button class="tabBtn" id="tabMissed" type="button">Missed Deadlines</button>
         </div>
-      
-        <div class="trainingsTableControls">
-  <button type="button" class="tabBtn" id="toggleTrainingsTable">Expand table</button>
-</div>
 
-        <div class="trainingsTableShell collapsed hidden" id="trainingsTableShell">
-          <div class="tableWrap">
-            <table class="table" id="trainingsTable">
-              <thead id="trainingsThead"></thead>
-              <tbody></tbody>
-            </table>
+        <div class="trainingsTableControls">
+            <button type="button" class="tabBtn" id="toggleTrainingsTable">Expand table</button>
           </div>
-        
-          <div class="empty" id="trainingsEmpty">No training data found.</div>
-        </div>
+          
+          <div class="trainingsTableShell collapsed" id="trainingsTableShell">
+            <div class="tableWrap">
+              <table class="table" id="deadlinesTable">
+                <thead id="deadlinesThead"></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          
+            <div class="empty" id="trainingsEmpty">No training data found.</div>
+          </div>
+
+
+
       </div>
 
 
@@ -181,7 +184,7 @@
           </div>
           <div class="pill" id="trainingsSource">—</div>
         </div>
-    
+
        <div class="tabs" id="trainingTabs">
           <button class="tabBtn active" type="button" data-training-tab="TOTAL">Total</button>
           <button class="tabBtn" type="button" data-training-tab="PAX">PAX</button>
@@ -200,7 +203,7 @@
               <div class="trainingKpiSide" id="trainingForecastCounts">—</div>
             </div>
           </div>
-        
+
           <div class="card kpi trainingKpi">
             <div class="kpiLabel">April progress</div>
             <div class="trainingKpiRow">
@@ -208,7 +211,7 @@
               <div class="trainingKpiSide" id="trainingAprilCounts">—</div>
             </div>
           </div>
-        
+
           <div class="card kpi trainingKpi">
             <div class="kpiLabel">May progress</div>
             <div class="trainingKpiRow">
@@ -216,7 +219,7 @@
               <div class="trainingKpiSide" id="trainingMayCounts">—</div>
             </div>
           </div>
-        
+
           <div class="card kpi trainingKpi">
             <div class="kpiLabel">June progress</div>
             <div class="trainingKpiRow">
@@ -224,7 +227,7 @@
               <div class="trainingKpiSide" id="trainingJuneCounts">—</div>
             </div>
           </div>
-        
+
           <div class="card kpi trainingKpi">
             <div class="kpiLabel">July progress</div>
             <div class="trainingKpiRow">
@@ -233,7 +236,7 @@
             </div>
           </div>
         </section>
-    
+
         <div class="tableWrap">
           <table class="table" id="trainingsTable">
             <thead id="trainingsThead">
@@ -253,12 +256,12 @@
             <tbody></tbody>
           </table>
         </div>
-    
+
         <div class="empty" id="trainingsEmpty">No training data found.</div>
       </div>
     </section>
-    
-    
+
+
     <!-- TRAINING / STAFFING / INSPECTIONS -->
     <section class="grid three">
       <div class="card">
