@@ -33,9 +33,6 @@ searchEl.addEventListener("input", () => render());
 
 let state = null;
 
-let activeDeadlineTab = "completed"; // ✅ default selected
-
-
 async function load() {
   lastUpdatedEl.textContent = "Loading latest upload…";
   state = null;
