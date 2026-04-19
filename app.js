@@ -7,8 +7,6 @@ const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
 const lastUpdatedEl = el("lastUpdated");
 const searchToggle = el("searchToggle");
-const lordDateEl = el("lordDate");
-const lordApplyBtn = el("lordApply");
 
 searchToggle.addEventListener("click", () => {
   document.body.classList.toggle("search-open");
@@ -49,23 +47,6 @@ async function load() {
   }
 
   state = data;
-  // ✅ set default date picker value to backend cutoff (first load)
-  if (lordDateEl && data.lordControl?.cutoff) {
-    lordDateEl.value = data.lordControl.cutoff;
-  }
-  
-  // ✅ Apply button: load for selected date
-  if (lordApplyBtn && lordDateEl) {
-    lordApplyBtn.onclick = () => refreshLordForDate(lordDateEl.value);
-  }
-  
-  console.log("Lord control metric:", data.lordControl);
-
-  if (data.lordControl) {
-    console.log(
-      `Lord control % green (nomination before ${data.lordControl.cutoff}): ${data.lordControl.percent}% (${data.lordControl.green}/${data.lordControl.eligible})`
-    );
-  }
   
   lastUpdatedEl.textContent = `Loaded: ${data.sourceFile.name} • Updated: ${fmtDateTime(
     data.sourceFile.updatedIso
@@ -93,7 +74,6 @@ function render() {
     renderPanel("staffingPanel", null);
     renderPanel("inspectionsPanel", null);
     renderHeatmap([]);
-    renderLordControl(null);
     return;
   }
 
@@ -139,7 +119,6 @@ function render() {
   renderPanel("staffingPanel", d.panels?.staffing);
   renderPanel("inspectionsPanel", d.panels?.inspections);
   renderHeatmap(d.weekly || []);
-  renderLordControl(state?.lordControl);
 }
 
 function renderMissed(rows) {
@@ -352,31 +331,6 @@ function renderPanel(containerId, panel) {
   `;
 }
 
-function renderLordControl(lord){
-  // Baseline (left)
-  const base = lord?.baseline;
-  setText("lordCutoff", lord?.cutoff ?? "—");
-  setText("lordPercentBase", base ? `${base.percent}%` : "—");
-  setText("lordCountsBase", base ? `Completed: ${base.green} • Total eligible: ${base.eligible}` : "—");
-
-  // As-of (right)
-  const asOf = lord?.asOf;
-  setText("lordAsOfDate", asOf?.date ?? "—");
-  setText("lordPercentAsOf", asOf ? `${asOf.percentOfBaseline}%` : "—");
-  setText("lordCountsAsOf", asOf ? `Completed before date: ${asOf.green} • (out of ${base?.eligible ?? "—"})` : "—");
-
-  // Pill (optional): show both
-  const pill = el("lordPctPill");
-  if (pill){
-    if (!lord || !base) pill.textContent = "—";
-    else {
-      const right = asOf ? ` • As-of: ${asOf.percentOfBaseline}%` : "";
-      pill.textContent = `Base: ${base.percent}% (${base.green}/${base.eligible})${right}`;
-    }
-  }
-}
-
-
 function renderHeatmap(weeks) {
   const hm = el("heatmap");
   hm.innerHTML = "";
@@ -436,27 +390,3 @@ function escape(s) {
 }
 
 load();
-
-async function refreshLordForDate(dateIso){
-  if (!dateIso) return;
-
-  // show immediate UI feedback
-  const pill = el("lordPctPill");
-  if (pill) pill.textContent = "Loading…";
-  setText("lordCutoff", dateIso);
-
-  const url = `${API_URL}?lordAsOf=${encodeURIComponent(dateIso)}`;
-  const res = await fetch(url, { cache: "no-store" });
-  const data = await res.json();
-
-  if (!data.ok) {
-    if (pill) pill.textContent = "Error";
-    return;
-  }
-
-  // keep main dashboard state as-is, but update lordControl
-  state = state || {};
-  state.lordControl = data.lordControl;
-
-  renderLordControl(state.lordControl);
-}
