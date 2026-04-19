@@ -5,6 +5,7 @@ const el = (id) => document.getElementById(id);
 
 let activeDeadlineTab = "completed";
 let activeTrainingTab = "TOTAL";
+let trainingTableExpanded = false;
 
 const refreshBtn = el("refreshBtn");
 const searchEl = el("search");
