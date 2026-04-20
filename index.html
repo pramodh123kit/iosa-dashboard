@@ -37,6 +37,86 @@
 
   <main class="wrap">
     <!-- KPI CARDS -->
+    <section class="grid one">
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Trainings</h2>
+            <p class="muted">Forecast vs nominated vs completed by department.</p>
+          </div>
+          <div class="pill" id="trainingsSource">—</div>
+        </div>
+
+       <div class="tabs" id="trainingTabs">
+          <button class="tabBtn active" type="button" data-training-tab="TOTAL">Total</button>
+          <button class="tabBtn" type="button" data-training-tab="PAX">PAX</button>
+          <button class="tabBtn" type="button" data-training-tab="RAMP">RAMP</button>
+          <button class="tabBtn" type="button" data-training-tab="AIS">AIS</button>
+          <button class="tabBtn" type="button" data-training-tab="LOD">LOD</button>
+          <button class="tabBtn" type="button" data-training-tab="P&amp;E">P&amp;E</button>
+          <button class="tabBtn" type="button" data-training-tab="UTILITY">UTILITY</button>
+        </div>
+
+        <section class="grid kpis trainingKpis">
+          <div class="card kpi trainingKpi">
+            <div class="kpiLabel">Total Forecast</div>
+            <div class="trainingKpiRow">
+              <div class="kpiValue" id="trainingForecastPct">—</div>
+              <div class="trainingKpiSide" id="trainingForecastCounts">—</div>
+            </div>
+          </div>
+
+          <div class="card kpi trainingKpi">
+            <div class="kpiLabel">April progress</div>
+            <div class="trainingKpiRow">
+              <div class="kpiValue" id="trainingAprilPct">—</div>
+              <div class="trainingKpiSide" id="trainingAprilCounts">—</div>
+            </div>
+          </div>
+
+          <div class="card kpi trainingKpi">
+            <div class="kpiLabel">May progress</div>
+            <div class="trainingKpiRow">
+              <div class="kpiValue" id="trainingMayPct">—</div>
+              <div class="trainingKpiSide" id="trainingMayCounts">—</div>
+            </div>
+          </div>
+
+          <div class="card kpi trainingKpi">
+            <div class="kpiLabel">June progress</div>
+            <div class="trainingKpiRow">
+              <div class="kpiValue" id="trainingJunePct">—</div>
+              <div class="trainingKpiSide" id="trainingJuneCounts">—</div>
+            </div>
+          </div>
+
+          <div class="card kpi trainingKpi">
+            <div class="kpiLabel">July progress</div>
+            <div class="trainingKpiRow">
+              <div class="kpiValue" id="trainingJulyPct">—</div>
+              <div class="trainingKpiSide" id="trainingJulyCounts">—</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="trainingsTableControls">
+          <button type="button" class="tabBtn" id="toggleTrainingsTable">Expand table</button>
+        </div>
+        
+        <div class="trainingsTableShell collapsed hidden" id="trainingsTableShell">
+          <div class="tableWrap">
+            <table class="table" id="trainingsTable">
+              <thead id="trainingsThead"></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        
+          <div class="empty" id="trainingsEmpty">No training data found.</div>
+        </div> 
+      </div>
+    </section>
+
+    
     <section class="grid kpis">
       <div class="card kpi">
         <div class="kpiLabel">Completion progress</div>
@@ -187,84 +267,7 @@
       </div>
     </section>
 
-    <section class="grid one">
-      <div class="card">
-        <div class="cardHead">
-          <div>
-            <h2>Trainings</h2>
-            <p class="muted">Forecast vs nominated vs completed by department.</p>
-          </div>
-          <div class="pill" id="trainingsSource">—</div>
-        </div>
-
-       <div class="tabs" id="trainingTabs">
-          <button class="tabBtn active" type="button" data-training-tab="TOTAL">Total</button>
-          <button class="tabBtn" type="button" data-training-tab="PAX">PAX</button>
-          <button class="tabBtn" type="button" data-training-tab="RAMP">RAMP</button>
-          <button class="tabBtn" type="button" data-training-tab="AIS">AIS</button>
-          <button class="tabBtn" type="button" data-training-tab="LOD">LOD</button>
-          <button class="tabBtn" type="button" data-training-tab="P&amp;E">P&amp;E</button>
-          <button class="tabBtn" type="button" data-training-tab="UTILITY">UTILITY</button>
-        </div>
-
-        <section class="grid kpis trainingKpis">
-          <div class="card kpi trainingKpi">
-            <div class="kpiLabel">Total Forecast</div>
-            <div class="trainingKpiRow">
-              <div class="kpiValue" id="trainingForecastPct">—</div>
-              <div class="trainingKpiSide" id="trainingForecastCounts">—</div>
-            </div>
-          </div>
-
-          <div class="card kpi trainingKpi">
-            <div class="kpiLabel">April progress</div>
-            <div class="trainingKpiRow">
-              <div class="kpiValue" id="trainingAprilPct">—</div>
-              <div class="trainingKpiSide" id="trainingAprilCounts">—</div>
-            </div>
-          </div>
-
-          <div class="card kpi trainingKpi">
-            <div class="kpiLabel">May progress</div>
-            <div class="trainingKpiRow">
-              <div class="kpiValue" id="trainingMayPct">—</div>
-              <div class="trainingKpiSide" id="trainingMayCounts">—</div>
-            </div>
-          </div>
-
-          <div class="card kpi trainingKpi">
-            <div class="kpiLabel">June progress</div>
-            <div class="trainingKpiRow">
-              <div class="kpiValue" id="trainingJunePct">—</div>
-              <div class="trainingKpiSide" id="trainingJuneCounts">—</div>
-            </div>
-          </div>
-
-          <div class="card kpi trainingKpi">
-            <div class="kpiLabel">July progress</div>
-            <div class="trainingKpiRow">
-              <div class="kpiValue" id="trainingJulyPct">—</div>
-              <div class="trainingKpiSide" id="trainingJulyCounts">—</div>
-            </div>
-          </div>
-        </section>
-
-        <div class="trainingsTableControls">
-          <button type="button" class="tabBtn" id="toggleTrainingsTable">Expand table</button>
-        </div>
-        
-        <div class="trainingsTableShell collapsed hidden" id="trainingsTableShell">
-          <div class="tableWrap">
-            <table class="table" id="trainingsTable">
-              <thead id="trainingsThead"></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        
-          <div class="empty" id="trainingsEmpty">No training data found.</div>
-        </div> 
-      </div>
-    </section>
+    
 
     <!-- WEEKLY HEATMAP -->
     <section class="card" style="display:none;">
