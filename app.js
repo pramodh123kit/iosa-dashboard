@@ -1,5 +1,5 @@
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbwmdmRW7UvT4pGRGZ87dG3GFzYqUTjIRLu9d7kJACOgjPcSSUFPKy4M8IgGzyGqsK0tMQ/exec";
+  "https://script.google.com/macros/s/AKfycbxseMcmnt5qkggPHoqP1AoIdm-jGXerauwe_LE6LqxbJ4cSXOJUiXcklcBapmzzeeYoXg/exec";
 
 const el = (id) => document.getElementById(id);
 
